@@ -19,6 +19,8 @@ Rahnema/
 ├── app.js                  # Main application logic
 ├── questions.js            # Questions data
 ├── GoogleAppsScript.gs     # Google Apps Script for Sheets integration
+├── config.example.js       # Configuration template (safe to commit)
+├── config.js               # Configuration file (gitignored - DO NOT COMMIT)
 ├── README.md               # This file
 ├── Q1.txt                  # Question set 1
 ├── Q2.txt                  # Question set 2
@@ -39,7 +41,8 @@ To enable automatic submission to Google Sheets:
 
 #### Step 1: Open Your Google Sheet
 
-Open the Google Sheet: https://docs.google.com/spreadsheets/d/19KAIJU-4MbDc3jeKo5JGEJ_c9GbpV7PrBV0IqWLiFR8/edit
+1. Create a new Google Sheet or open your existing one
+2. Note: Keep your Google Sheet URL private and do not commit it to version control
 
 #### Step 2: Create Apps Script
 
@@ -60,15 +63,16 @@ Open the Google Sheet: https://docs.google.com/spreadsheets/d/19KAIJU-4MbDc3jeKo
 4. Click **Deploy**
 5. **Copy the Web App URL** that appears
 
-#### Step 4: Update app.js
+#### Step 4: Configure the Application
 
-1. Open `app.js` in a text editor
-2. Find this line:
-   ```javascript
-   const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+1. Copy `config.example.js` to `config.js`:
+   ```bash
+   cp config.example.js config.js
    ```
+2. Open `config.js` in a text editor
 3. Replace `'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'` with the Web App URL you copied
 4. Save the file
+5. **Important**: `config.js` is gitignored and will not be committed to version control, keeping your sensitive URLs safe
 
 #### Step 5: Test
 
