@@ -2,7 +2,7 @@
 *.txt
 
 # Exclude sensitive configuration files
-config.js
+# config.js - Now included for GitHub Pages deployment
 .env
 .env.local
 
