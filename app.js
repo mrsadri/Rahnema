@@ -5,7 +5,8 @@ let appState = {
     currentQuestionIndex: 0,
     answers: {},
     startTime: null,
-    endTime: null
+    endTime: null,
+    lastResults: null // Store last calculated results for retry
 };
 
 // Initialize app
@@ -319,6 +320,9 @@ function showResults(results) {
         summaryContainer.appendChild(summaryItem);
     });
     
+    // Store results for potential retry
+    appState.lastResults = results;
+    
     // Submit to Google Sheets
     submitToGoogleSheets(results);
 }
@@ -366,8 +370,19 @@ function submitToGoogleSheets(results) {
             <p>Please copy config.example.js to config.js and update the GOOGLE_SCRIPT_URL</p>
             <p>See README.md for instructions.</p>
             <p style="margin-top: 15px; font-weight: 500;">نتیجه ثبت نشد، لطفاً اسکرین‌شات بگیرید و در گروه بفرستید.</p>
+            <button id="retry-submit-btn" class="btn btn-primary" style="margin-top: 15px;">تلاش مجدد برای ارسال</button>
         `;
         document.getElementById('restart-btn').style.display = 'block';
+        
+        // Add retry button event listener
+        const retryBtn = document.getElementById('retry-submit-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', function() {
+                // Retry submission - use stored results or recalculate
+                const resultsToSubmit = appState.lastResults || calculateResults();
+                submitToGoogleSheets(resultsToSubmit);
+            });
+        }
         
         // Log detailed diagnostic information
         console.error('Configuration Error Details:', {
@@ -510,7 +525,8 @@ function restartExam() {
         currentQuestionIndex: 0,
         answers: {},
         startTime: null,
-        endTime: null
+        endTime: null,
+        lastResults: null
     };
     
     // Reset form
