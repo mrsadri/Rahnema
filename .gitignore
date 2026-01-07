@@ -1,0 +1,26 @@
+# Exclude text files
+*.txt
+
+# Exclude sensitive configuration files
+config.js
+.env
+.env.local
+
+# Exclude OS files
+.DS_Store
+Thumbs.db
+
+# Exclude editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Exclude node modules if any
+node_modules/
+
+# Exclude build files
+dist/
+build/
+

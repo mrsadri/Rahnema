@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rahnema - Material Design 3 Components Exam</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Registration Screen -->
+    <div id="registration-screen" class="screen active">
+        <div class="container">
+            <div class="logo-container">
+                <img src="Rahnema LOGO.svg" alt="Rahnema Logo">
+                <h1>Material Design 3 Components Exam</h1>
+            </div>
+            <p class="subtitle">Please enter your information to begin</p>
+            
+            <form id="registration-form" class="form">
+                <div class="form-group">
+                    <label for="student-name">Full Name *</label>
+                    <input type="text" id="student-name" name="name" required placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="student-email">Email Address *</label>
+                    <input type="email" id="student-email" name="email" required placeholder="Enter your email address">
+                </div>
+                
+                <div class="form-group">
+                    <label for="student-telegram">Telegram ID *</label>
+                    <input type="text" id="student-telegram" name="telegram" required placeholder="Enter your Telegram ID">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Question Set to Answer *</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="questions" value="Q1" checked required>
+                            <span>Question Set 1 (36 questions)</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="questions" value="Q2" required>
+                            <span>Question Set 2 (39 questions)</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="questions" value="Q3" required>
+                            <span>Question Set 3 (33 questions)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Start Exam</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="screen">
+        <div class="container">
+            <div class="logo-container" style="margin-bottom: 20px;">
+                <img src="Rahnema LOGO.svg" alt="Rahnema Logo" style="height: 40px;">
+            </div>
+            <div class="quiz-header">
+                <h2 id="quiz-title">Material Design 3 Components Exam</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text">
+                    Question <span id="current-question">1</span> of <span id="total-questions">0</span>
+                </p>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-number">Question <span id="question-number">1</span></div>
+                <h3 id="question-text"></h3>
+                <div id="options-container" class="options-container"></div>
+            </div>
+            
+            <div class="quiz-navigation">
+                <button id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+                <button id="next-btn" class="btn btn-primary">Next</button>
+                <button id="submit-quiz-btn" class="btn btn-success" style="display: none;">Submit Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="screen">
+        <div class="container">
+            <div class="logo-container" style="margin-bottom: 20px;">
+                <img src="Rahnema LOGO.svg" alt="Rahnema Logo" style="height: 40px;">
+            </div>
+            <div class="results-header">
+                <h1>Exam Results</h1>
+                <div class="score-circle">
+                    <svg class="score-svg" viewBox="0 0 120 120">
+                        <circle class="score-bg" cx="60" cy="60" r="54"></circle>
+                        <circle class="score-progress" id="score-circle" cx="60" cy="60" r="54"></circle>
+                    </svg>
+                    <div class="score-text">
+                        <span id="score-percentage">0</span>%
+                    </div>
+                </div>
+                <p class="score-details">
+                    You answered <strong id="correct-count">0</strong> out of <strong id="total-answered">0</strong> questions correctly
+                </p>
+            </div>
+            
+            <div class="results-summary">
+                <h3>Summary by Question Set</h3>
+                <div id="summary-container" class="summary-container"></div>
+            </div>
+            
+            <div class="submission-status" id="submission-status">
+                <p>Submitting your results...</p>
+            </div>
+            
+            <button id="restart-btn" class="btn btn-primary" style="display: none;">Take Exam Again</button>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
