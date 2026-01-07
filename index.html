@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rahnema - Material Design 3 Components Exam</title>
+    <!-- Google Script URL configuration (for deployment when config.js is not available) -->
+    <meta name="google-script-url" content="https://script.google.com/macros/s/AKfycbwTeMkvyDg1RLakbKCJpeRxshtg-mo30OIJnb5fNaf0z93l0mRuq4-mXT1CEh8VFmGeuQ/exec">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="alternate icon" href="favicon.svg">
     <link rel="apple-touch-icon" href="favicon.svg">
@@ -124,7 +126,76 @@
     </div>
 
     <script src="questions.js"></script>
-    <script src="config.js" onerror="console.error('Failed to load config.js'); window.CONFIG = window.CONFIG || {};"></script>
+    <!-- Configuration loading with multiple fallback methods -->
+    <script>
+        // Initialize CONFIG object early to prevent undefined errors
+        window.CONFIG = window.CONFIG || {};
+        
+        // Method 1: Try to load from config.js (with retry)
+        function loadConfigScript(retryCount = 0) {
+            const maxRetries = 2;
+            const script = document.createElement('script');
+            script.src = 'config.js';
+            script.async = false; // Ensure synchronous loading
+            
+            script.onload = function() {
+                console.log('config.js loaded successfully');
+                // Verify CONFIG was actually set
+                if (typeof CONFIG === 'undefined' || !CONFIG.GOOGLE_SCRIPT_URL) {
+                    console.warn('config.js loaded but CONFIG not properly initialized');
+                    tryAlternativeConfigMethods();
+                }
+            };
+            
+            script.onerror = function() {
+                console.warn('Failed to load config.js, attempt ' + (retryCount + 1));
+                if (retryCount < maxRetries) {
+                    // Retry after a short delay
+                    setTimeout(() => loadConfigScript(retryCount + 1), 500);
+                } else {
+                    console.warn('config.js failed to load after ' + (maxRetries + 1) + ' attempts');
+                    tryAlternativeConfigMethods();
+                }
+            };
+            
+            document.head.appendChild(script);
+        }
+        
+        // Method 2: Try alternative configuration sources
+        function tryAlternativeConfigMethods() {
+            // Check for environment variable (useful for GitHub Pages)
+            const envConfig = window.ENV_CONFIG || window.__ENV_CONFIG__;
+            if (envConfig && envConfig.GOOGLE_SCRIPT_URL) {
+                console.log('Using configuration from environment variable');
+                window.CONFIG = envConfig;
+                return;
+            }
+            
+            // Check for data attribute on html element
+            const htmlElement = document.documentElement;
+            const dataConfig = htmlElement.getAttribute('data-google-script-url');
+            if (dataConfig && dataConfig.startsWith('https://script.google.com')) {
+                console.log('Using configuration from data attribute');
+                window.CONFIG = { GOOGLE_SCRIPT_URL: dataConfig };
+                return;
+            }
+            
+            // Check for meta tag
+            const metaConfig = document.querySelector('meta[name="google-script-url"]');
+            if (metaConfig && metaConfig.content && metaConfig.content.startsWith('https://script.google.com')) {
+                console.log('Using configuration from meta tag');
+                window.CONFIG = { GOOGLE_SCRIPT_URL: metaConfig.content };
+                return;
+            }
+            
+            // Last resort: empty config (will show error message)
+            console.warn('No configuration found, using empty CONFIG object');
+            window.CONFIG = window.CONFIG || {};
+        }
+        
+        // Start loading configuration
+        loadConfigScript();
+    </script>
     <script src="app.js"></script>
 </body>
 </html>

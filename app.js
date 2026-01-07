@@ -13,12 +13,92 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Configuration validation and retrieval utility
+function getGoogleScriptUrl() {
+    // Wait a bit for config to load if it's still loading
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    function checkConfig() {
+        // Method 1: Check CONFIG object
+        if (typeof CONFIG !== 'undefined' && CONFIG && CONFIG.GOOGLE_SCRIPT_URL) {
+            const url = CONFIG.GOOGLE_SCRIPT_URL;
+            if (url && url !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' && url.startsWith('https://script.google.com')) {
+                return url;
+            }
+        }
+        
+        // Method 2: Check window.CONFIG (fallback)
+        if (window.CONFIG && window.CONFIG.GOOGLE_SCRIPT_URL) {
+            const url = window.CONFIG.GOOGLE_SCRIPT_URL;
+            if (url && url !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' && url.startsWith('https://script.google.com')) {
+                return url;
+            }
+        }
+        
+        // Method 3: Check environment variables
+        if (window.ENV_CONFIG && window.ENV_CONFIG.GOOGLE_SCRIPT_URL) {
+            const url = window.ENV_CONFIG.GOOGLE_SCRIPT_URL;
+            if (url && url.startsWith('https://script.google.com')) {
+                return url;
+            }
+        }
+        
+        // Method 4: Check data attribute
+        const dataUrl = document.documentElement.getAttribute('data-google-script-url');
+        if (dataUrl && dataUrl.startsWith('https://script.google.com')) {
+            return dataUrl;
+        }
+        
+        // Method 5: Check meta tag
+        const metaTag = document.querySelector('meta[name="google-script-url"]');
+        if (metaTag && metaTag.content && metaTag.content.startsWith('https://script.google.com')) {
+            return metaTag.content;
+        }
+        
+        return null;
+    }
+    
+    // Immediate check
+    let url = checkConfig();
+    if (url) return url;
+    
+    // Retry if config might still be loading (for async scenarios)
+    while (attempts < maxAttempts && !url) {
+        attempts++;
+        url = checkConfig();
+        if (url) return url;
+        // Small delay to allow script to load
+        if (attempts < maxAttempts) {
+            // Use synchronous wait (only for initialization)
+            const start = Date.now();
+            while (Date.now() - start < 50) {
+                // Busy wait (only acceptable during initialization)
+            }
+        }
+    }
+    
+    return url;
+}
+
 function initializeApp() {
-    // Check if config is loaded
-    if (typeof CONFIG === 'undefined') {
-        console.warn('CONFIG is not defined. Make sure config.js is loaded correctly.');
-    } else if (!CONFIG.GOOGLE_SCRIPT_URL || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
-        console.warn('Google Script URL not configured in config.js');
+    // Enhanced config validation with multiple checks
+    const configUrl = getGoogleScriptUrl();
+    
+    if (!configUrl) {
+        console.warn('CONFIG validation: Google Script URL not found through any method');
+        console.warn('Available methods checked: CONFIG object, window.CONFIG, ENV_CONFIG, data attributes, meta tags');
+        
+        // Log diagnostic information
+        console.log('Diagnostic info:', {
+            'typeof CONFIG': typeof CONFIG,
+            'CONFIG exists': typeof CONFIG !== 'undefined',
+            'CONFIG.GOOGLE_SCRIPT_URL': typeof CONFIG !== 'undefined' ? CONFIG.GOOGLE_SCRIPT_URL : 'N/A',
+            'window.CONFIG': window.CONFIG,
+            'document.readyState': document.readyState
+        });
+    } else {
+        console.log('Configuration loaded successfully:', configUrl.substring(0, 50) + '...');
     }
     
     // Registration form handler
@@ -265,14 +345,9 @@ function submitToGoogleSheets(results) {
         duration: Math.round((appState.endTime - appState.startTime) / 1000) // seconds
     };
     
-    // Get Google Apps Script URL from config
-    // IMPORTANT: Copy config.example.js to config.js and fill in your actual URL
-    let GOOGLE_SCRIPT_URL = null;
-    
-    // Try to get URL from CONFIG object (handle cases where config.js might not load)
-    if (typeof CONFIG !== 'undefined' && CONFIG && CONFIG.GOOGLE_SCRIPT_URL) {
-        GOOGLE_SCRIPT_URL = CONFIG.GOOGLE_SCRIPT_URL;
-    }
+    // Get Google Apps Script URL using enhanced configuration retrieval
+    // This method tries multiple sources and handles incognito mode issues
+    let GOOGLE_SCRIPT_URL = getGoogleScriptUrl();
     
     // Validate URL is configured (not placeholder)
     const PLACEHOLDER_TEXT = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
@@ -280,13 +355,31 @@ function submitToGoogleSheets(results) {
         GOOGLE_SCRIPT_URL === PLACEHOLDER_TEXT || 
         GOOGLE_SCRIPT_URL.trim() === '' ||
         !GOOGLE_SCRIPT_URL.startsWith('https://script.google.com')) {
+        
+        // Enhanced error message with diagnostic information
+        const isIncognito = detectIncognitoMode();
+        const diagnosticInfo = getDiagnosticInfo();
+        
         statusDiv.className = 'submission-status error';
         statusDiv.innerHTML = `
             <p><strong>Google Sheets integration not configured.</strong></p>
             <p>Please copy config.example.js to config.js and update the GOOGLE_SCRIPT_URL</p>
             <p>See README.md for instructions.</p>
+            <p style="margin-top: 15px; font-weight: 500;">نتیجه ثبت نشد، لطفاً اسکرین‌شات بگیرید و در گروه بفرستید.</p>
         `;
         document.getElementById('restart-btn').style.display = 'block';
+        
+        // Log detailed diagnostic information
+        console.error('Configuration Error Details:', {
+            'GOOGLE_SCRIPT_URL': GOOGLE_SCRIPT_URL,
+            'typeof CONFIG': typeof CONFIG,
+            'CONFIG object': typeof CONFIG !== 'undefined' ? CONFIG : 'undefined',
+            'window.CONFIG': window.CONFIG,
+            'document.readyState': document.readyState,
+            'isIncognito': isIncognito,
+            'userAgent': navigator.userAgent
+        });
+        
         return;
     }
     
@@ -368,6 +461,45 @@ function showScreen(screenId) {
         screen.classList.remove('active');
     });
     document.getElementById(screenId).classList.add('active');
+}
+
+// Helper function to detect incognito mode (approximate)
+function detectIncognitoMode() {
+    // Note: This is not 100% reliable but can help with diagnostics
+    try {
+        // Check for storage availability (incognito mode often restricts storage)
+        const testKey = '__incognito_test__';
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        return false;
+    } catch (e) {
+        return true;
+    }
+}
+
+// Helper function to get diagnostic information
+function getDiagnosticInfo() {
+    const info = [];
+    
+    if (typeof CONFIG === 'undefined') {
+        info.push('CONFIG undefined');
+    } else if (!CONFIG.GOOGLE_SCRIPT_URL) {
+        info.push('CONFIG.GOOGLE_SCRIPT_URL missing');
+    }
+    
+    if (document.readyState !== 'complete') {
+        info.push('Document not ready: ' + document.readyState);
+    }
+    
+    // Check if config.js script tag exists
+    const configScript = Array.from(document.querySelectorAll('script')).find(
+        s => s.src && s.src.includes('config.js')
+    );
+    if (!configScript) {
+        info.push('config.js script tag not found');
+    }
+    
+    return info.length > 0 ? info.join(', ') : null;
 }
 
 function restartExam() {

@@ -1,5 +1,6 @@
 # Exclude text files
 *.txt
+*.md
 
 # Exclude sensitive configuration files
 # config.js - Now included for GitHub Pages deployment
