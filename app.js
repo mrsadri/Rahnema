@@ -260,7 +260,7 @@ function submitToGoogleSheets(results) {
     
     // Get Google Apps Script URL from config
     // IMPORTANT: Replace this with your actual Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTeMkvyDg1RLakbKCJpeRxshtg-mo30OIJnb5fNaf0z93l0mRuq4-mXT1CEh8VFmGeuQ/exec';
     
     // Validate URL is configured (not placeholder)
     const PLACEHOLDER_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
