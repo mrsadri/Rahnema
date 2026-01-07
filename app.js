@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
+    // Check if config is loaded
+    if (typeof CONFIG === 'undefined') {
+        console.warn('CONFIG is not defined. Make sure config.js is loaded correctly.');
+    } else if (!CONFIG.GOOGLE_SCRIPT_URL || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+        console.warn('Google Script URL not configured in config.js');
+    }
+    
     // Registration form handler
     const registrationForm = document.getElementById('registration-form');
     registrationForm.addEventListener('submit', handleRegistration);
@@ -260,14 +267,17 @@ function submitToGoogleSheets(results) {
     
     // Get Google Apps Script URL from config
     // IMPORTANT: Copy config.example.js to config.js and fill in your actual URL
-    const GOOGLE_SCRIPT_URL = (typeof CONFIG !== 'undefined' && CONFIG.GOOGLE_SCRIPT_URL) 
-        ? CONFIG.GOOGLE_SCRIPT_URL 
-        : null;
+    let GOOGLE_SCRIPT_URL = null;
+    
+    // Try to get URL from CONFIG object (handle cases where config.js might not load)
+    if (typeof CONFIG !== 'undefined' && CONFIG && CONFIG.GOOGLE_SCRIPT_URL) {
+        GOOGLE_SCRIPT_URL = CONFIG.GOOGLE_SCRIPT_URL;
+    }
     
     // Validate URL is configured (not placeholder)
-    const PLACEHOLDER_URL = 'https://script.google.com/macros/s/AKfycbwTeMkvyDg1RLakbKCJpeRxshtg-mo30OIJnb5fNaf0z93l0mRuq4-mXT1CEh8VFmGeuQ/exec';
+    const PLACEHOLDER_TEXT = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
     if (!GOOGLE_SCRIPT_URL || 
-        GOOGLE_SCRIPT_URL === PLACEHOLDER_URL || 
+        GOOGLE_SCRIPT_URL === PLACEHOLDER_TEXT || 
         GOOGLE_SCRIPT_URL.trim() === '' ||
         !GOOGLE_SCRIPT_URL.startsWith('https://script.google.com')) {
         statusDiv.className = 'submission-status error';
